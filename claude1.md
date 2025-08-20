@@ -1,558 +1,161 @@
-Tôi sẽ tạo các file source code cho backend theo kiến trúc trong tài liệu. Đây là cấu trúc project và các file chính:
+Chắc chắn rồi. Dưới đây là bài báo cáo chi tiết được soạn thảo với vai trò là Tổng Công trình sư, trình bày trước Hội đồng Khoa học và Công nghệ của Công ty TNHH Kỹ thuật Quản lý bay (ATTECH).
 
-## Cấu trúc Project
+-----
 
-```
-backend/
-├── main.py
-├── requirements.txt
-├── Dockerfile
-├── engines/
-│   ├── __init__.py
-│   ├── intent_classifier.py
-│   ├── faiss_manager.py
-│   ├── llm_provider.py
-│   └── response_generator.py
-├── utils/
-│   ├── __init__.py
-│   ├── analytics.py
-│   ├── cache.py
-│   └── monitoring.py
-├── models/
-│   ├── __init__.py
-│   └── schemas.py
-├── db/
-│   └── init.sql
-├── data/
-│   └── faiss_indices/
-└── logs/
-```
+**BÁO CÁO DỰ ÁN CHIẾN LƯỢC**
+**XÂY DỰNG HỆ THỐNG CHATBOT DOANH NGHIỆP THẾ HỆ MỚI**
 
-## File chính
+**Kính gửi:** Hội đồng Khoa học và Công nghệ Công ty TNHH Kỹ thuật Quản lý bay (ATTECH).
+**Người trình bày:** Tổng Công trình sư Dự án.
+**Ngày:** 20/08/2025
 
-### requirements.txt
+-----
 
-```txt
-# Web framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-slowapi==0.1.9
+### **PHẦN I: TỔNG QUAN CHIẾN LƯỢC**
 
-# Database
-psycopg2-binary==2.9.9
-redis==5.0.1
+#### **1. Bối Cảnh và Tầm Nhìn**
 
-# Machine Learning & RAG
-faiss-cpu==1.7.4
-sentence-transformers==2.2.2
-numpy==1.24.4
+Kính thưa Hội đồng,
 
-# HTTP clients
-aiohttp==3.9.1
-requests==2.31.0
+Công ty TNHH Kỹ thuật Quản lý bay (ATTECH) đã có một lịch sử phát triển đáng tự hào, từ Xí nghiệp Điện tử hàng không năm 1986 đến một công ty kỹ thuật đa ngành hàng đầu như ngày nay. Chúng ta luôn là đơn vị tiên phong trong việc ứng dụng công nghệ để đảm bảo an toàn và hiệu quả cho ngành Hàng không Việt Nam.
 
-# Data processing
-pydantic==2.5.0
-python-multipart==0.0.6
+Trong bối cảnh của cuộc cách mạng công nghiệp 4.0, tài sản quý giá nhất của một doanh nghiệp kỹ thuật như ATTECH chính là **tri thức** – từ các tài liệu kỹ thuật, quy trình vận hành, hồ sơ dự án, cho đến kinh nghiệm của các chuyên gia. Tuy nhiên, tri thức này đang bị phân mảnh trên nhiều hệ thống, tài liệu và phòng ban khác nhau. Việc truy xuất thông tin một cách nhanh chóng, chính xác và nhất quán đang trở thành một thách thức lớn, ảnh hưởng đến hiệu suất làm việc của nhân viên và trải nghiệm của khách hàng.
 
-# System monitoring
-psutil==5.9.6
+Để giải quyết thách thức này và tiếp tục khẳng định vị thế tiên phong, dự án **"Xây dựng Hệ thống Chatbot Doanh nghiệp Thế hệ mới"** được đề xuất. Đây không chỉ là một công cụ trả lời tự động, mà là một bước đi chiến lược nhằm xây dựng một **"Bộ não số"** cho toàn bộ ATTECH, một nền tảng quản lý và khai thác tri thức thông minh, phục vụ cả mục tiêu vận hành nội bộ và phát triển kinh doanh.
 
-# Environment
-python-dotenv==1.0.0
+#### **2. Giải Pháp Đề Xuất: Chatbot Doanh Nghiệp Thế Hệ Mới**
 
-# Utilities
-python-json-logger==2.0.7
+Chúng tôi đề xuất một hệ thống Chatbot được xây dựng dựa trên kiến trúc **Retrieval-Augmented Generation (RAG)** tiên tiến, đảm bảo câu trả lời không chỉ thông minh mà còn **chính xác** và **dựa trên nguồn dữ liệu tin cậy** của công ty.
+
+Hệ thống được xây dựng trên bốn trụ cột công nghệ chính:
+
+1.  **Hiểu Sâu Ngữ Cảnh (Context-Aware):** Chatbot nhận biết người dùng đang xem trang web nào, tài liệu nào, từ đó đưa ra câu trả lời phù hợp nhất với ngữ cảnh, tăng tính liên quan và độ chính xác.
+2.  **Phân Tích & Định Tuyến Thông Minh (Intelligent Routing):** Hệ thống tự động phân loại ý định của người dùng (ví dụ: hỏi về dịch vụ bay hiệu chuẩn, thông số kỹ thuật của Shelter, hay chính sách bảo hành) và chỉ tìm kiếm trong kho tri thức tương ứng, giúp tối ưu tốc độ và độ chính xác.
+3.  **Linh Hoạt & Tối Ưu Chi Phí (Multi-LLM):** Thay vì phụ thuộc vào một nhà cung cấp AI duy nhất (như OpenAI hay Google), hệ thống có khả năng tự động lựa chọn mô hình ngôn ngữ (LLM) phù hợp nhất cho từng tác vụ, cân bằng giữa hiệu suất, tốc độ và chi phí. Đây là một lợi thế chiến lược, giúp chúng ta tự chủ về công nghệ và tối ưu chi phí vận hành.
+4.  **Phân Tích & Cải Tiến Liên Tục (Analytics-Driven):** Mọi tương tác đều được ghi nhận và phân tích. Điều này không chỉ giúp chatbot ngày càng thông minh hơn mà còn cung cấp cho ban lãnh đạo những "dữ liệu vàng" về nhu cầu của khách hàng và nhân viên, từ đó cải tiến sản phẩm, dịch vụ và quy trình nội bộ.
+
+#### **3. Luồng Hoạt Động Thông Minh**
+
+Để Hội đồng dễ hình dung, luồng hoạt động của hệ thống có thể được mô tả đơn giản như sau:
+
+```mermaid
+flowchart TD
+    A[<b>Người dùng (Khách hàng/Nhân viên)</b><br>Đặt câu hỏi trên website/portal nội bộ:<br><i>"Quy trình hiệu chuẩn thiết bị giám sát hàng không?"</i>] --> B{<b>Lớp Giao diện & Ghi nhận Ngữ cảnh</b><br>Ghi nhận người dùng đang ở trang "Dịch vụ Kỹ thuật"};
+    B --> C{<b>Bộ não AI: Lõi xử lý RAG</b><br>1. Phân tích ý định: "Hỏi về quy trình kỹ thuật"<br>2. Định tuyến: "Tìm trong kho tri thức Dịch vụ Hàng không"};
+    C --> D[<b>Kho tri thức Doanh nghiệp (FAISS)</b><br>Quét và truy xuất các tài liệu, quy trình liên quan nhất];
+    D --> C;
+    C --> E{<b>Bộ não AI: Tạo câu trả lời</b><br>1. Tổng hợp thông tin từ các tài liệu đã truy xuất<br>2. Chọn LLM tối ưu để tạo câu trả lời tự nhiên<br>3. Trích dẫn nguồn tài liệu tham chiếu};
+    E --> F[<b>Câu trả lời Chính xác & Tin cậy</b><br>Gửi lại cho người dùng trong vài giây];
 ```
 
-### main.py
+-----
 
-```python
-"""
-Enterprise Chatbot API - Main FastAPI Application
-"""
-import os
-import time
-import logging
-import asyncio
-from datetime import datetime
-from typing import List, Optional
+### **PHẦN II: KIẾN TRÚC CÔNG NGHỆ TỔNG THỂ**
 
-import uvicorn
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-import redis
-from dotenv import load_dotenv
+Hệ thống được thiết kế theo kiến trúc 4 lớp (4-Tier Architecture) hiện đại, đảm bảo tính module hóa, dễ dàng bảo trì, nâng cấp và có khả năng mở rộng (scalability) cao để đáp ứng hàng ngàn người dùng đồng thời.
 
-# Load environment variables
-load_dotenv()
+```mermaid
+graph TD
+    subgraph Frontend Layer
+        A1[React App]
+        A2[Context Manager]
+        A3[Analytics Tracker]
+    end
 
-# Configure logging
-logging.basicConfig(
-    level=getattr(logging, os.getenv('LOG_LEVEL', 'INFO')),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/chatbot.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+    subgraph API Gateway Layer
+        B1[Nginx / Cloudflare]
+        B2[Load Balancer, Rate Limiting, SSL]
+        B3[Authentication & Authorization]
+    end
 
-# Import models and schemas
-from models.schemas import ChatRequest, ChatResponse, PageContext
-from engines.intent_classifier import IntentClassifier
-from engines.faiss_manager import FAISSCollectionManager
-from engines.llm_provider import MultiLLMProvider
-from engines.response_generator import ContextualResponseGenerator
-from utils.analytics import ChatAnalytics
-from utils.cache import CacheManager
-from utils.monitoring import PerformanceMonitor
+    subgraph Chatbot API Layer (RAG Core)
+        C1[FastAPI Application]
+        C2[Intent Classification Engine]
+        C3[Document Router & FAISS Manager]
+        C4[Multi-LLM Provider Handler]
+        C5[Response Generation]
+    end
 
-# Rate limiting
-limiter = Limiter(key_func=get_remote_address)
+    subgraph Data Layer
+        D1[FAISS Collections<br><i>(Vectorized Knowledge Base)</i>]
+        D2[PostgreSQL<br><i>(Metadata, Chat History, Analytics)</i>]
+        D3[Redis<br><i>(Caching, Session)</i>]
+    end
 
-# Initialize FastAPI
-app = FastAPI(
-    title="Enterprise Chatbot API",
-    description="Advanced RAG-based chatbot with context-aware routing",
-    version="2.0.0",
-    docs_url="/api/docs" if os.getenv('ENVIRONMENT') != 'production' else None,
-    redoc_url="/api/redoc" if os.getenv('ENVIRONMENT') != 'production' else None
-)
+    A1 -->|HTTPS/WebSocket| B1
+    B1 --> C1
+    C1 --> D1
+    C1 --> D2
+    C1 --> D3
 
-# Store startup time
-app.state.start_time = time.time()
-
-# Middleware setup
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# CORS configuration
-cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:3000').split(',')
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
-
-# Trusted hosts
-if os.getenv('ENVIRONMENT') == 'production':
-    app.add_middleware(
-        TrustedHostMiddleware, 
-        allowed_hosts=["yourdomain.com", "api.yourdomain.com", "www.yourdomain.com"]
-    )
-
-# Redis setup
-redis_client = redis.Redis(
-    host=os.getenv('REDIS_HOST', 'localhost'),
-    port=int(os.getenv('REDIS_PORT', 6379)),
-    decode_responses=True,
-    socket_connect_timeout=5,
-    socket_timeout=5
-)
-
-# Initialize components
-intent_classifier = IntentClassifier()
-faiss_manager = FAISSCollectionManager()
-llm_provider = MultiLLMProvider()
-response_generator = ContextualResponseGenerator()
-analytics = ChatAnalytics(
-    postgres_url=os.getenv('DATABASE_URL'),
-    redis_client=redis_client
-)
-cache_manager = CacheManager(redis_client)
-performance_monitor = PerformanceMonitor()
-
-
-@app.on_startup
-async def startup_event():
-    """Initialize resources on startup"""
-    logger.info("Starting up Enterprise Chatbot API...")
-    
-    try:
-        # Test Redis connection
-        redis_client.ping()
-        logger.info("Redis connection established")
-    except Exception as e:
-        logger.error(f"Redis connection failed: {e}")
-        raise
-    
-    try:
-        # Load FAISS indices
-        await faiss_manager.initialize_collections()
-        await faiss_manager.load_all_collections()
-        logger.info("FAISS collections initialized")
-    except Exception as e:
-        logger.error(f"FAISS initialization failed: {e}")
-        raise
-    
-    try:
-        # Initialize LLM providers
-        await llm_provider.initialize_providers()
-        intent_classifier.set_llm_provider(llm_provider)
-        response_generator.set_llm_provider(llm_provider)
-        response_generator.set_faiss_manager(faiss_manager)
-        logger.info("LLM providers initialized")
-    except Exception as e:
-        logger.error(f"LLM provider initialization failed: {e}")
-        raise
-    
-    logger.info("Enterprise Chatbot API startup complete")
-
-
-@app.on_shutdown
-async def shutdown_event():
-    """Cleanup resources on shutdown"""
-    logger.info("Shutting down Enterprise Chatbot API...")
-    
-    try:
-        await llm_provider.cleanup()
-        redis_client.close()
-        logger.info("Resources cleaned up successfully")
-    except Exception as e:
-        logger.error(f"Error during shutdown: {e}")
-
-
-def get_remote_address(request: Request) -> str:
-    """Get client IP address with proxy support"""
-    if forwarded_for := request.headers.get("x-forwarded-for"):
-        return forwarded_for.split(",")[0].strip()
-    elif real_ip := request.headers.get("x-real-ip"):
-        return real_ip
-    else:
-        return request.client.host if request.client else "unknown"
-
-
-@app.post("/api/chat", response_model=ChatResponse)
-@limiter.limit("20/minute")
-async def chat_endpoint(
-    request: ChatRequest,
-    background_tasks: BackgroundTasks,
-    http_request: Request
-):
-    """Main chat endpoint with full RAG pipeline"""
-    start_time = time.time()
-    remote_addr = get_remote_address(http_request)
-    
-    try:
-        # Input validation
-        if not request.message.strip():
-            raise HTTPException(status_code=400, detail="Message cannot be empty")
-        
-        if len(request.message) > 1000:
-            raise HTTPException(status_code=400, detail="Message too long (max 1000 characters)")
-        
-        logger.info(f"Processing chat request from session {request.session_id}")
-        
-        # Check cache first
-        cache_key = cache_manager.generate_cache_key(request.message, request.context)
-        cached_response = await cache_manager.get_cached_response(cache_key)
-        
-        if cached_response:
-            logger.info(f"Cache hit for session {request.session_id}")
-            # Still track for analytics
-            background_tasks.add_task(
-                analytics.track_conversation,
-                request.session_id,
-                request.message,
-                cached_response,
-                remote_addr
-            )
-            return cached_response
-        
-        # Stage 1: Intent Classification + Context Analysis
-        intent_result = await intent_classifier.analyze_query(
-            query=request.message,
-            context=request.context,
-            history=request.history
-        )
-        
-        logger.info(f"Intent classified: {intent_result.intent.value}, Target: {intent_result.target_product}")
-        
-        # Stage 2: Document Routing + Vector Search
-        relevant_docs = await faiss_manager.search_targeted_collections(
-            queries=intent_result.refined_queries,
-            collections=intent_result.target_collections,
-            context_filter={
-                "product": intent_result.target_product,
-                "section": request.context.section
-            },
-            top_k=8
-        )
-        
-        logger.info(f"Found {len(relevant_docs)} relevant documents")
-        
-        # Stage 3: Response Generation
-        response_data = await response_generator.generate_response(
-            user_query=request.message,
-            intent=intent_result,
-            context=request.context,
-            relevant_docs=relevant_docs,
-            history=request.history
-        )
-        
-        # Build final response
-        chat_response = ChatResponse(
-            response=response_data["content"],
-            session_id=request.session_id,
-            sources=response_data["sources"],
-            confidence=response_data["confidence"],
-            intent=intent_result.intent.value,
-            target_product=intent_result.target_product,
-            processing_time=time.time() - start_time
-        )
-        
-        # Background tasks
-        background_tasks.add_task(
-            cache_manager.cache_response,
-            cache_key,
-            chat_response,
-            ttl=3600  # 1 hour cache
-        )
-        
-        background_tasks.add_task(
-            analytics.track_conversation,
-            request.session_id,
-            request.message,
-            chat_response,
-            remote_addr
-        )
-        
-        logger.info(f"Chat response generated in {chat_response.processing_time:.2f}s")
-        return chat_response
-        
-    except Exception as e:
-        error_msg = str(e)
-        logger.error(f"Chat error for session {request.session_id}: {error_msg}")
-        
-        # Return fallback response
-        return ChatResponse(
-            response="Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng liên hệ support@yourdomain.com để được hỗ trợ.",
-            session_id=request.session_id,
-            confidence=0.0,
-            processing_time=time.time() - start_time,
-            intent="error",
-            sources=[]
-        )
-
-
-@app.get("/api/health")
-async def health_check():
-    """Comprehensive health check"""
-    health_status = {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "uptime": time.time() - app.state.start_time,
-        "components": {}
-    }
-    
-    # Check FAISS collections
-    try:
-        collections_status = await faiss_manager.health_check()
-        health_status["components"]["faiss"] = {
-            "status": "healthy" if collections_status["all_loaded"] else "degraded",
-            "details": collections_status
-        }
-    except Exception as e:
-        health_status["components"]["faiss"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
-        health_status["status"] = "degraded"
-    
-    # Check Redis
-    try:
-        redis_client.ping()
-        health_status["components"]["redis"] = {"status": "healthy"}
-    except Exception as e:
-        health_status["components"]["redis"] = {
-            "status": "unhealthy", 
-            "error": str(e)
-        }
-        health_status["status"] = "degraded"
-    
-    # Check LLM providers
-    try:
-        provider_status = await llm_provider.health_check()
-        health_status["components"]["llm_providers"] = provider_status
-        
-        if provider_status["overall_status"] != "healthy":
-            health_status["status"] = "degraded"
-    except Exception as e:
-        health_status["components"]["llm_providers"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
-        health_status["status"] = "degraded"
-    
-    return health_status
-
-
-@app.get("/api/analytics/dashboard")
-async def analytics_dashboard():
-    """Analytics endpoint for monitoring"""
-    try:
-        dashboard_data = await analytics.get_dashboard_data()
-        return dashboard_data
-    except Exception as e:
-        logger.error(f"Analytics dashboard error: {e}")
-        raise HTTPException(status_code=500, detail="Analytics temporarily unavailable")
-
-
-@app.get("/api/monitoring/metrics")
-async def get_monitoring_metrics():
-    """Get system monitoring metrics"""
-    try:
-        system_metrics = await performance_monitor.get_system_metrics()
-        
-        # Get application metrics
-        faiss_status = await faiss_manager.health_check()
-        llm_status = await llm_provider.health_check()
-        cache_stats = cache_manager.get_stats()
-        
-        return {
-            'system': system_metrics,
-            'application': {
-                'uptime': time.time() - app.state.start_time,
-                'faiss_status': faiss_status,
-                'llm_providers': llm_status,
-                'cache_stats': cache_stats
-            }
-        }
-    except Exception as e:
-        logger.error(f"Monitoring metrics error: {e}")
-        raise HTTPException(status_code=500, detail="Monitoring temporarily unavailable")
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """Global exception handler"""
-    logger.error(f"Global exception: {exc}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error"}
-    )
-
-
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 8000)),
-        reload=os.getenv("ENVIRONMENT") != "production",
-        workers=1 if os.getenv("ENVIRONMENT") != "production" else 4
-    )
+    style Frontend Layer fill:#e0f7fa,stroke:#00796b
+    style API Gateway Layer fill:#fff9c4,stroke:#fbc02d
+    style Chatbot API Layer fill:#ffcdd2,stroke:#c62828
+    style Data Layer fill:#d1c4e9,stroke:#512da8
 ```
 
-### models/schemas.py
+  * **Lớp 1: Giao diện người dùng (Frontend Layer):** Xây dựng bằng React, đảm bảo trải nghiệm tương tác mượt mà, hiện đại và đáp ứng trên mọi thiết bị. Lớp này có nhiệm vụ thu thập ngữ cảnh trang web và theo dõi hành vi người dùng để gửi về cho bộ não AI.
+  * **Lớp 2: Cổng Giao tiếp (API Gateway Layer):** Đóng vai trò như một "người gác cổng" vững chắc, sử dụng Nginx/Cloudflare để cân bằng tải, chống tấn công DDoS, mã hóa SSL và quản lý luồng truy cập, đảm bảo hệ thống luôn ổn định và an toàn.
+  * **Lớp 3: Lõi Trí tuệ (Chatbot API Layer):** Đây là "bộ não" của hệ thống, nơi các thuật toán thông minh nhất được thực thi. Xây dựng trên nền tảng FastAPI (Python) hiệu năng cao, lớp này chịu trách nhiệm phân tích ý định, định tuyến truy vấn, tìm kiếm thông tin trong kho tri thức và tạo ra câu trả lời cuối cùng.
+  * **Lớp 4: Dữ liệu & Tri thức (Data Layer):** Nền tảng lưu trữ toàn bộ "bộ nhớ" của chatbot.
+      * **FAISS:** Công nghệ từ Facebook AI, giúp "vector hóa" toàn bộ tài liệu của công ty thành một không gian vector, cho phép tìm kiếm ngữ nghĩa siêu nhanh và chính xác.
+      * **PostgreSQL & Redis:** Lưu trữ các dữ liệu có cấu trúc như lịch sử hội thoại, thông tin người dùng, và phục vụ caching để tăng tốc độ phản hồi.
 
-```python
-"""
-Pydantic models for request/response schemas
-"""
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, validator
-from datetime import datetime
+-----
 
+### **PHẦN III: LỢI ÍCH CHIẾN LƯỢC VÀ ỨNG DỤNG CHO ATTECH**
 
-class PageContext(BaseModel):
-    url: str
-    title: str
-    product: Optional[str] = None
-    section: Optional[str] = None
-    content_preview: Optional[str] = None
-    
-    @validator('url')
-    def validate_url(cls, v):
-        if not v or not v.startswith(('http://', 'https://')):
-            raise ValueError('Invalid URL format')
-        return v
+Dự án này không chỉ là một khoản đầu tư vào công nghệ, mà là một khoản đầu tư chiến lược mang lại lợi ích kép cho cả vận hành nội bộ và kinh doanh.
 
+#### **1. Tối Ưu Hóa Vận Hành Nội Bộ**
 
-class ChatMessage(BaseModel):
-    content: str
-    sender: str
-    timestamp: int
-    context: Optional[PageContext] = None
-    
-    @validator('sender')
-    def validate_sender(cls, v):
-        if v not in ['user', 'assistant']:
-            raise ValueError('Sender must be user or assistant')
-        return v
+Với một danh mục ngành nghề kinh doanh rộng lớn, từ dịch vụ hàng không, tư vấn kỹ thuật, xây lắp đến công nghệ thông tin, việc quản lý tri thức nội bộ là cực kỳ quan trọng. Chatbot sẽ trở thành một **"Trợ lý ảo Toàn năng"** cho cán bộ nhân viên:
 
+  * **Kỹ sư & Chuyên gia Kỹ thuật:** Tìm kiếm nhanh các bản vẽ kỹ thuật, tài liệu hướng dẫn bảo trì, quy chuẩn ngành, hồ sơ dự án cũ chỉ bằng một câu hỏi tự nhiên thay vì phải lục tìm trong các ổ đĩa mạng.
+  * **Phòng Kinh doanh & Dự án:** Truy xuất nhanh thông tin về các dịch vụ, báo giá mẫu, năng lực của công ty để chuẩn bị hồ sơ thầu và tư vấn khách hàng.
+  * **Nhân sự Mới:** Rút ngắn đáng kể thời gian đào tạo và hòa nhập bằng cách cung cấp một công cụ để hỏi đáp 24/7 về mọi quy trình, chính sách của công ty.
 
-class ChatRequest(BaseModel):
-    message: str
-    session_id: str
-    context: PageContext
-    history: List[ChatMessage] = []
-    user_id: Optional[str] = None
-    
-    @validator('message')
-    def validate_message(cls, v):
-        if not v or not v.strip():
-            raise ValueError('Message cannot be empty')
-        if len(v) > 1000:
-            raise ValueError('Message too long (max 1000 characters)')
-        return v.strip()
-    
-    @validator('session_id')
-    def validate_session_id(cls, v):
-        if not v or len(v) < 10:
-            raise ValueError('Invalid session ID')
-        return v
+#### **2. Thúc Đẩy Kinh Doanh và Nâng Cao Trải Nghiệm Khách Hàng**
 
+Đối với khách hàng và đối tác truy cập website `attech.com.vn`, chatbot sẽ đóng vai trò là một chuyên gia tư vấn tiền bán hàng (pre-sales) không mệt mỏi:
 
-class SourceReference(BaseModel):
-    content: str
-    collection: str
-    score: float
-    metadata: Dict[str, Any] = {}
+  * **Tư vấn Dịch vụ Chuyên sâu:** Trả lời ngay lập tức các câu hỏi kỹ thuật phức tạp về "dịch vụ bay kiểm tra, hiệu chuẩn", "hệ thống AMSS", "giải pháp Shelter"... giúp tăng niềm tin và sự chuyên nghiệp của ATTECH.
+  * **Hỗ trợ 24/7:** Giải đáp các thắc mắc phổ biến mọi lúc, mọi nơi, giữ chân khách hàng tiềm năng và giảm tải cho bộ phận hỗ trợ.
+  * **Thu thập Insight Khách hàng:** Phân tích các câu hỏi của khách hàng giúp chúng ta hiểu rõ họ đang quan tâm đến dịch vụ nào nhất, những điểm nào còn chưa rõ trong thông tin sản phẩm, từ đó cải tiến website và chiến lược marketing.
 
+-----
 
-class ChatResponse(BaseModel):
-    response: str
-    session_id: str
-    sources: List[SourceReference] = []
-    confidence: float = 0.0
-    intent: Optional[str] = None
-    target_product: Optional[str] = None
-    processing_time: float = 0.0
-    
-    @validator('confidence')
-    def validate_confidence(cls, v):
-        return max(0.0, min(1.0, v))
+### **PHẦN IV: LỘ TRÌNH TRIỂN KHAI VÀ HƯỚNG PHÁT TRIỂN**
 
+#### **1. Lộ trình Triển khai (Dự kiến 12 tuần)**
 
-class HealthCheckResponse(BaseModel):
-    status: str
-    timestamp: str
-    uptime: float
-    components: Dict[str, Any]
+Dự án được chia thành các giai đoạn rõ ràng với các cột mốc cụ thể để đảm bảo tiến độ và chất lượng.
 
+  * **Tuần 1-2: Xây dựng Hạ tầng Lõi:** Hoàn thiện kiến trúc backend, thiết lập cơ sở dữ liệu và hệ thống FAISS.
+  * **Tuần 3-4: Phát triển Lớp Trí tuệ RAG:** Xây dựng bộ phân tích ý định và định tuyến thông minh.
+  * **Tuần 5-6: Tích hợp Giao diện Người dùng:** Hoàn thiện Chatbot UI/UX và hệ thống theo dõi ngữ cảnh.
+  * **Tuần 7-8: Chuẩn bị Dữ liệu & Triển khai Thử nghiệm:** Số hóa và nạp các tài liệu ban đầu, triển khai trên môi trường production.
+  * **Tuần 9-12: Kiểm thử, Tối ưu & Vận hành:** Kiểm thử toàn diện, tối ưu hóa hiệu năng, thiết lập hệ thống giám sát và chính thức ra mắt.
 
-class AnalyticsSummary(BaseModel):
-    total_conversations: int
-    avg_confidence: float
-    avg_processing_time: float
-    top_intents: List[Dict[str, Any]]
-    top_products: List[Dict[str, Any]]
+#### **2. Hướng Phát Triển Tương Lai**
 
+Sau khi triển khai thành công phiên bản đầu tiên, hệ thống này sẽ là nền tảng vững chắc để phát triển các tính năng nâng cao, đưa ATTECH lên một tầm cao mới trong chuyển đổi số:
 
-class SystemMetrics(BaseModel):
-    timestamp: str
-    cpu_usage: float
-    memory_usage: float
-    disk_usage: float
-    network_stats: Dict[str, int]
-```
+  * **Trợ lý Ảo Đa Kênh:** Tích hợp chatbot vào các kênh giao tiếp khác như Zalo, Microsoft Teams để tạo ra một trải nghiệm liền mạch.
+  * **Hỗ trợ Đa Ngôn ngữ:** Phục vụ các đối tác và khách hàng quốc tế, đặc biệt quan trọng trong ngành hàng không.
+  * **Tự động hóa Quy trình:** Tích hợp sâu hơn với các hệ thống ERP, CRM để không chỉ trả lời câu hỏi mà còn có thể thực hiện các tác vụ đơn giản (ví dụ: tạo yêu cầu hỗ trợ, kiểm tra tình trạng đơn hàng).
+  * **Phân tích Dự báo:** Sử dụng dữ liệu hội thoại để dự báo các xu hướng, nhu cầu của thị trường và các vấn đề vận hành tiềm ẩn.
 
-Tôi sẽ tiếp tục với các file engine trong comment tiếp theo để tránh response quá dài.
+-----
+
+### **PHẦN V: KẾT LUẬN VÀ KIẾN NGHỊ**
+
+Kính thưa Hội đồng,
+
+Dự án "Chatbot Doanh nghiệp Thế hệ mới" không phải là một dự án CNTT đơn thuần. Đây là một **sáng kiến chiến lược** nhằm **vốn hóa tài sản tri thức** của ATTECH, nâng cao năng lực cạnh tranh, tối ưu hóa hiệu suất vận hành và tạo ra những trải nghiệm vượt trội cho cả nhân viên và khách hàng.
+
+Với kiến trúc công nghệ vững chắc, lộ trình triển khai rõ ràng và tiềm năng phát triển to lớn, chúng tôi tin tưởng rằng dự án sẽ mang lại giá trị bền vững cho công ty.
+
+Vì vậy, tôi trân trọng đề nghị Hội đồng Khoa học và Công nghệ xem xét, phê duyệt chủ trương và ngân sách để dự án được chính thức khởi động, tiếp tục khẳng định vị thế dẫn đầu về công nghệ của ATTECH trong kỷ nguyên số.
+
+**Xin trân trọng cảm ơn sự lắng nghe của Hội đồng.**
