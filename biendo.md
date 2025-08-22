@@ -10,7 +10,7 @@ Biểu đồ dưới đây mô tả luồng công việc chi tiết của dự �
 
 ```mermaid
 graph TD
-    subgraph GD1_NenTangVaThietKe_Tuan1_3
+    subgraph Giai_Đoạn_Nền_Tảng_Thiết_Kế
         A1[1.1 Lựa chọn Embedding Model] --> A2{1.2 Test Model OK?}
         A2 -- Yes --> B1
         A2 -- No --> A1
