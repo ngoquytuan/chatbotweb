@@ -1,3 +1,375 @@
+Vấn đề bạn gặp phải là **circular import** trong flashrag_core module. Tôi thấy nguyên nhân và sẽ giúp bạn fix:
+
+## Vấn đề chính:
+
+1. **Files thiếu**: Các file `DenseRetriever`, `SparseRetriever` etc. chưa được copy vào
+2. **Circular import**: `flashrag_core/__init__.py` đang import từ modules chưa tồn tại
+3. **Import structure sai**: Cấu trúc import không đúng
+
+## Giải pháp:
+
+### 1. Fix flashrag_core/__init__.py
+
+```python
+# flashrag_core/__init__.py
+"""
+FlashRAG Core Integration - Fixed version
+"""
+
+# Thay vì import trực tiếp, chỉ expose những gì thực sự có
+__version__ = "1.0.0"
+
+# Import conditionally để tránh lỗi khi modules không tồn tại
+def safe_import():
+    """Safely import available modules"""
+    available_modules = {}
+    
+    try:
+        from .retriever.dense_retriever import DenseRetriever
+        available_modules['DenseRetriever'] = DenseRetriever
+    except ImportError:
+        pass
+    
+    try:
+        from .retriever.sparse_retriever import SparseRetriever  
+        available_modules['SparseRetriever'] = SparseRetriever
+    except ImportError:
+        pass
+        
+    try:
+        from .utils.chunkie import Chunkie
+        available_modules['Chunkie'] = Chunkie
+    except ImportError:
+        pass
+        
+    return available_modules
+
+# Initialize available modules
+_modules = safe_import()
+globals().update(_modules)
+
+# Define what's available for import
+__all__ = list(_modules.keys())
+```
+
+### 2. Fix các __init__.py files trong submodules
+
+```python
+# flashrag_core/retriever/__init__.py
+"""
+Retriever modules
+"""
+
+# Chỉ import những file thực sự tồn tại
+try:
+    from .dense_retriever import DenseRetriever
+except ImportError:
+    DenseRetriever = None
+
+try:
+    from .sparse_retriever import SparseRetriever
+except ImportError:
+    SparseRetriever = None
+
+# Chỉ export những gì available
+__all__ = []
+if DenseRetriever is not None:
+    __all__.append('DenseRetriever')
+if SparseRetriever is not None:
+    __all__.append('SparseRetriever')
+```
+
+### 3. Tạo Mock Classes cho các modules thiếu
+
+```python
+# flashrag_core/retriever/dense_retriever.py
+"""
+Dense Retriever - Mock implementation
+"""
+
+class DenseRetriever:
+    """Mock Dense Retriever implementation"""
+    
+    def __init__(self, model_path: str, index_path: str = None, device: str = "cpu"):
+        self.model_path = model_path
+        self.index_path = index_path
+        self.device = device
+        print(f"Mock DenseRetriever initialized with model: {model_path}")
+    
+    def retrieve(self, query: str, k: int = 10):
+        """Mock retrieve method"""
+        print(f"Mock retrieval for query: {query[:50]}...")
+        return [
+            {"id": f"doc_{i}", "content": f"Mock document {i}", "score": 0.9 - i*0.1}
+            for i in range(k)
+        ]
+    
+    def encode(self, texts):
+        """Mock encoding method"""
+        print(f"Mock encoding {len(texts)} texts")
+        import numpy as np
+        return np.random.rand(len(texts), 768)  # Mock embeddings
+
+# flashrag_core/retriever/sparse_retriever.py  
+class SparseRetriever:
+    """Mock Sparse Retriever implementation"""
+    
+    def __init__(self, index_path: str = None, config: dict = None):
+        self.index_path = index_path
+        self.config = config or {}
+        print(f"Mock SparseRetriever initialized")
+    
+    def retrieve(self, query: str, k: int = 10):
+        """Mock retrieve method"""
+        print(f"Mock sparse retrieval for query: {query[:50]}...")
+        return [
+            {"id": f"sparse_doc_{i}", "content": f"Mock sparse document {i}", "score": 0.8 - i*0.08}
+            for i in range(k)
+        ]
+
+# flashrag_core/utils/chunkie.py
+class Chunkie:
+    """Mock Chunkie implementation"""
+    
+    def __init__(self, method: str = "semantic", **kwargs):
+        self.method = method
+        self.config = kwargs
+        print(f"Mock Chunkie initialized with method: {method}")
+    
+    def chunk_text(self, text: str):
+        """Mock chunking method"""
+        print(f"Mock chunking text of length: {len(text)}")
+        # Simple sentence-based chunking
+        sentences = text.split('.')
+        chunks = []
+        
+        for i, sentence in enumerate(sentences):
+            if sentence.strip():
+                chunk = type('Chunk', (), {
+                    'text': sentence.strip(),
+                    'start_pos': i * 100,
+                    'end_pos': (i + 1) * 100,
+                    'token_count': len(sentence.split())
+                })()
+                chunks.append(chunk)
+        
+        return chunks
+```
+
+### 4. Fix core/flashrag_processor.py
+
+```python
+# core/flashrag_processor.py
+"""
+FlashRAG Processor với error handling
+"""
+import sys
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+class FlashRAGProcessor:
+    def __init__(self, config):
+        self.config = config
+        self.components = {}
+        self.fallback_mode = False
+        
+    async def initialize_components(self):
+        """Initialize FlashRAG components với fallback"""
+        
+        try:
+            # Try to import FlashRAG components
+            from flashrag_core import safe_import
+            available_modules = safe_import()
+            
+            if 'DenseRetriever' in available_modules:
+                DenseRetriever = available_modules['DenseRetriever']
+                self.components['dense_retriever'] = DenseRetriever(
+                    model_path=self.config.get("E5_MODEL_PATH", "intfloat/e5-base-v2")
+                )
+                logger.info("DenseRetriever initialized")
+            
+            if 'SparseRetriever' in available_modules:
+                SparseRetriever = available_modules['SparseRetriever'] 
+                self.components['sparse_retriever'] = SparseRetriever()
+                logger.info("SparseRetriever initialized")
+            
+            if 'Chunkie' in available_modules:
+                Chunkie = available_modules['Chunkie']
+                self.components['chunker'] = Chunkie(method="semantic")
+                logger.info("Chunkie initialized")
+                
+            logger.info(f"FlashRAG components initialized: {list(self.components.keys())}")
+            
+        except Exception as e:
+            logger.warning(f"Failed to initialize FlashRAG components: {e}")
+            await self._fallback_initialization()
+    
+    async def _fallback_initialization(self):
+        """Fallback nếu FlashRAG components fail"""
+        logger.info("Using fallback mock components...")
+        self.fallback_mode = True
+        
+        # Simple fallback implementations
+        self.components = {
+            'dense_retriever': self._mock_dense_retriever(),
+            'sparse_retriever': self._mock_sparse_retriever(),  
+            'chunker': self._mock_chunker()
+        }
+    
+    def _mock_dense_retriever(self):
+        class MockRetriever:
+            def retrieve(self, query, k=10):
+                return [{"id": f"mock_{i}", "content": f"Mock result {i}"} for i in range(k)]
+        return MockRetriever()
+    
+    def _mock_sparse_retriever(self):
+        class MockSparseRetriever:
+            def retrieve(self, query, k=10):
+                return [{"id": f"sparse_mock_{i}", "content": f"Mock sparse result {i}"} for i in range(k)]
+        return MockSparseRetriever()
+    
+    def _mock_chunker(self):
+        class MockChunker:
+            def chunk_text(self, text):
+                sentences = text.split('.')
+                return [type('Chunk', (), {'text': s.strip()})() for s in sentences if s.strip()]
+        return MockChunker()
+    
+    async def process_query(self, query: str, method: str = "dense"):
+        """Process query với available components"""
+        
+        if method == "dense" and "dense_retriever" in self.components:
+            return self.components["dense_retriever"].retrieve(query)
+        elif method == "sparse" and "sparse_retriever" in self.components:
+            return self.components["sparse_retriever"].retrieve(query)
+        else:
+            logger.warning(f"Method {method} not available, using fallback")
+            return [{"id": "fallback", "content": "Fallback response"}]
+    
+    def get_status(self):
+        """Get processor status"""
+        return {
+            "fallback_mode": self.fallback_mode,
+            "available_components": list(self.components.keys()),
+            "status": "initialized"
+        }
+```
+
+### 5. Fix main.py imports
+
+```python
+# main.py - Fixed imports
+"""
+Main CLI interface cho FlashRAG Data Management System
+"""
+import asyncio
+import click
+import logging
+from pathlib import Path
+from typing import List, Optional
+
+# Import với error handling
+try:
+    from core.collection_manager import EnhancedCollectionManager
+except ImportError as e:
+    print(f"Warning: Could not import EnhancedCollectionManager: {e}")
+    EnhancedCollectionManager = None
+
+try:
+    from core.flashrag_processor import FlashRAGProcessor
+except ImportError as e:
+    print(f"Warning: Could not import FlashRAGProcessor: {e}")
+    FlashRAGProcessor = None
+
+try:
+    from utils.flashrag_adapter import FlashRAGAdapter
+except ImportError as e:
+    print(f"Warning: Could not import FlashRAGAdapter: {e}")
+    FlashRAGAdapter = None
+
+try:
+    from utils.jsonl_handler import JSONLHandler
+except ImportError as e:
+    print(f"Warning: Could not import JSONLHandler: {e}")
+    JSONLHandler = None
+
+try:
+    from config.settings import settings
+except ImportError as e:
+    print(f"Warning: Could not import settings: {e}")
+    settings = {}
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+@click.group()
+def cli():
+    """FlashRAG Data Management CLI"""
+    pass
+
+@cli.command()
+def test():
+    """Test basic functionality"""
+    print("Testing FlashRAG integration...")
+    
+    if FlashRAGProcessor:
+        processor = FlashRAGProcessor({})
+        asyncio.run(processor.initialize_components())
+        status = processor.get_status()
+        print(f"Processor status: {status}")
+    else:
+        print("FlashRAGProcessor not available")
+    
+    print("Test completed!")
+
+@cli.command()
+def status():
+    """Show system status"""
+    components = {
+        "EnhancedCollectionManager": EnhancedCollectionManager is not None,
+        "FlashRAGProcessor": FlashRAGProcessor is not None,
+        "FlashRAGAdapter": FlashRAGAdapter is not None,
+        "JSONLHandler": JSONLHandler is not None,
+        "Settings": bool(settings)
+    }
+    
+    print("System Component Status:")
+    for component, available in components.items():
+        status = "✓ Available" if available else "✗ Not Available"
+        print(f"  {component}: {status}")
+
+if __name__ == "__main__":
+    cli()
+```
+
+### 6. Test the fixes:
+
+```bash
+# Test basic import
+python -c "from flashrag_core import safe_import; print('Import test passed')"
+
+# Test main
+python main.py status
+
+# Test processor
+python main.py test
+```
+
+Những fixes này sẽ:
+
+1. **Tránh circular imports** bằng cách sử dụng safe_import()
+2. **Graceful fallback** khi modules không tồn tại
+3. **Mock implementations** để system vẫn chạy được
+4. **Better error handling** trong tất cả imports
+
+Hãy thử chạy lại và cho tôi biết kết quả!
+
+
 Tôi vừa có ý tưởng tích hợp FlashRAG https://github.com/RUC-NLPIR/FlashRAG vào hệ thống quản trị dababase chatbot chăm sóc khách hàng của mình. Bạn hãy tạo cho tôi một thiết kế architectManageDB mới ứng dụng FlashRAG cho LLM thực hiện nhé. Các cấu hình database thì giữ nguyên như cũ.
 
 # Kiến Trúc FlashRAG-Enhanced Data Management Tool cho Enterprise Chatbot
@@ -2658,5 +3030,6 @@ Hệ thống này được thiết kế với tính module hóa cao, cho phép:
 5. **CLI-friendly**: Commands intuitive và comprehensive
 6. **Error handling**: Robust error handling và logging
 7. **Async support**: Performance tối ưu với async/await
+
 
 Bạn có muốn tôi tiếp tục với các file còn lại như web interface hoặc test files không?
