@@ -1,6 +1,6 @@
-Tất nhiên rồi. Bổ sung một biểu đồ luồng công việc với các "vòng lặp" (feedback loops) để xử lý khi có lỗi là một ý tưởng rất hay. Nó cho thấy một quy trình làm việc linh hoạt, lường trước rủi ro và tập trung vào chất lượng.
+Biểu đồ luồng công việc với các "vòng lặp" (feedback loops) để xử lý khi có lỗi. Quy trình làm việc sẽ linh hoạt, lường trước rủi ro và tập trung vào chất lượng.
 
-Dưới đây là biểu đồ và diễn giải chi tiết, tích hợp vào báo cáo kế hoạch bạn có thể trình bày với sếp.
+Dưới đây là biểu đồ và diễn giải chi tiết.
 
 -----
 
@@ -11,7 +11,7 @@ Biểu đồ dưới đây mô tả luồng công việc chi tiết của dự �
 ```mermaid
 graph TD
     subgraph GD1_NenTangVaThietKe_Tuan1_3
-        A1[1.1 Lua Chon Embedding Model] --> A2{1.2 Test Model OK?}
+        A1[1.1 Lựa chọn Embedding Model] --> A2{1.2 Test Model OK?}
         A2 -- Yes --> B1
         A2 -- No --> A1
         
