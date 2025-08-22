@@ -29,17 +29,17 @@ graph TD
         F3 -- No --> G1{Xác định nguyên nhân}
         F3 -- Yes --> H1
         G1 -- Truy xuất kém, sai ngữ cảnh --> A1
-        G1 -- "Cau Tra Loi 'Bia', Khong Bam Ngu Canh" --> F1
-        G1 -- Loi Phan Quyen/Toc Do CSDL --> B1
+        G1 -- "Câu trả lời bịa, không bám ngữ cảnh" --> F1
+        G1 -- Lỗi phân quyền CSDL --> B1
     end
 
-    subgraph Giai_Đoạn_4_TichHopVaVanHanh_Tuan11_12
-        H1[4.1 Xay Dung Va Tich Hop UI] --> H2[4.2 Thu Nghiem Nguoi Dung Cuoi - UAT]
-        H2 --> H3{4.3 Nguoi Dung Chap Nhan?}
-        H3 -- No --> H4{Xac Dinh Van De}
-        H3 -- Yes --> I1[✅ Van Hanh Chinh Thuc]
-        H4 -- Loi Giao Dien/Trai Nghiem --> H1
-        H4 -- Loi Logic/Do Chinh Xac --> F2
+    subgraph Giai_Đoạn_4_Tích_Hợp_Vận_Hành
+        H1[4.1 Xây dựng và tích hợp UI] --> H2[4.2 Thử nghiệm người dùng cuối]
+        H2 --> H3{4.3 Người dùng chấp nhận?}
+        H3 -- No --> H4{Xác định vấn đề}
+        H3 -- Yes --> I1[✅ Vận hành chính thức]
+        H4 -- Lỗi giao diện, trải nghiệm --> H1
+        H4 -- Lỗi Logic/độ chính xác --> F2
     end
     
     B2 --> C1
