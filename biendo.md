@@ -1,32 +1,29 @@
 Biểu đồ luồng công việc với các "vòng lặp" (feedback loops) để xử lý khi có lỗi. Quy trình làm việc sẽ linh hoạt, lường trước rủi ro và tập trung vào chất lượng.
 
-Dưới đây là biểu đồ và diễn giải chi tiết.
 
------
-
-### **4. Biểu đồ Luồng công việc & Xử lý Rủi ro**
+### **Biểu đồ Luồng công việc & Xử lý Rủi ro**
 
 Biểu đồ dưới đây mô tả luồng công việc chi tiết của dự án, bao gồm các "chốt chặn chất lượng" (Quality Gates) và các vòng lặp xử lý khi một công đoạn không đạt yêu cầu.
 
 ```mermaid
 graph TD
-    subgraph Giai_Đoạn_Nền_Tảng_Thiết_Kế
+    subgraph Giai_Đoạn_1_Nền_Tảng_Thiết_Kế
         A1[1.1 Lựa chọn Embedding Model] --> A2{1.2 Test Model OK?}
         A2 -- Yes --> B1
         A2 -- No --> A1
         
-        B1[1.3 Thiet Ke CSDL] --> B2[1.4 Xay Dung He Quan Tri CSDL]
+        B1[1.3 Thiết Kế CSDL] --> B2[1.4 Xây đựng hệ quản trị CSDL]
     end
 
-    subgraph GD2_PhatTrienCongCuVaDuLieu_Tuan4_7
-        C1[2.1 Xay Dung Tool RawToClean] --> C2[2.2 Phong Ban Chuan Bi Du Lieu]
-        C2 --> D1[2.3 Xay Dung Tool Danh Gia]
-        D1 --> D2{2.4 Du Lieu Dat Chuan?}
+    subgraph Giai_Đoạn_2_PhatTrienCongCuVaDuLieu_Tuan4_7
+        C1[2.1 Xây dựng Tool RawToClean] --> C2[2.2 Phòng ban chuẩn bị dữ liệu]
+        C2 --> D1[2.3 Xây dựng Tool đánh giá]
+        D1 --> D2{2.4 Dữ liệu đạt yêu cầu?}
         D2 -- No --> C2
-        D2 -- Yes --> E1[2.5 Module Nap Du Lieu]
+        D2 -- Yes --> E1[2.5 Module nạp dữ liệu vào CSDL]
     end
 
-    subgraph GD3_XayDungVaToiUuLoiAI_Tuan8_10
+    subgraph Giai_Đoạn_3_XayDungVaToiUuLoiAI_Tuan8_10
         F1[3.1 Xay Dung Loi RAG v1] --> F2[3.2 Test Loi RAG Tren May Chu AI]
         F2 --> F3{3.3 Ket Qua Test OK?}
         F3 -- No --> G1{Xac Dinh Nguyen Nhan}
@@ -36,7 +33,7 @@ graph TD
         G1 -- Loi Phan Quyen/Toc Do CSDL --> B1
     end
 
-    subgraph GD4_TichHopVaVanHanh_Tuan11_12
+    subgraph Giai_Đoạn_4_TichHopVaVanHanh_Tuan11_12
         H1[4.1 Xay Dung Va Tich Hop UI] --> H2[4.2 Thu Nghiem Nguoi Dung Cuoi - UAT]
         H2 --> H3{4.3 Nguoi Dung Chap Nhan?}
         H3 -- No --> H4{Xac Dinh Van De}
