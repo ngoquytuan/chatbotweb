@@ -79,6 +79,3 @@ Biểu đồ này thể hiện một quy trình kiểm soát chất lượng li�
           * Nếu vấn đề là **"Lỗi Giao diện/Trải nghiệm"**: Quay lại `[H1]` để đội frontend chỉnh sửa UI.
           * Nếu vấn đề là **"Lỗi Logic/Độ chính xác"**: Vấn đề nghiêm trọng hơn, cần quay lại `[F2]` để thực hiện lại quy trình test và tối ưu Lõi RAG.
 
------
-
-Báo cáo theo luồng này sẽ cho sếp của bạn thấy một kế hoạch không chỉ chi tiết về các bước cần làm, mà còn rất thực tế, lường trước được các rủi ro và có sẵn quy trình để xử lý một cách hệ thống, đảm bảo chất lượng sản phẩm cuối cùng.
