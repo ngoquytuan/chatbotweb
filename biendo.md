@@ -10,43 +10,44 @@ Biểu đồ dưới đây mô tả luồng công việc chi tiết của dự �
 
 ```mermaid
 graph TD
-    subgraph GĐ 1: Nền tảng & Thiết kế (Tuần 1-3)
-        A1[1.1 Lựa chọn Embedding Model] --> A2{1.2 Test Model OK?}
+    subgraph GD1_NenTangVaThietKe_Tuan1_3
+        A1[1.1 Lua Chon Embedding Model] --> A2{1.2 Test Model OK?}
         A2 -- Yes --> B1
         A2 -- No --> A1
         
-        B1[1.3 Thiết kế CSDL] --> B2[1.4 Xây dựng Hệ quản trị CSDL]
+        B1[1.3 Thiet Ke CSDL] --> B2[1.4 Xay Dung He Quan Tri CSDL]
     end
 
-    subgraph GĐ 2: Phát triển Công cụ & Dữ liệu (Tuần 4-7)
-        C1[2.1 Xây dựng Tool Raw-->Clean] --> C2[2.2 Phòng ban chuẩn bị dữ liệu]
-        C2 --> D1[2.3 Xây dựng Tool Đánh giá]
-        D1 --> D2{2.4 Dữ liệu đạt chuẩn?}
+    subgraph GD2_PhatTrienCongCuVaDuLieu_Tuan4_7
+        C1[2.1 Xay Dung Tool RawToClean] --> C2[2.2 Phong Ban Chuan Bi Du Lieu]
+        C2 --> D1[2.3 Xay Dung Tool Danh Gia]
+        D1 --> D2{2.4 Du Lieu Dat Chuan?}
         D2 -- No --> C2
-        D2 -- Yes --> E1[2.5 Module Nạp Dữ liệu]
+        D2 -- Yes --> E1[2.5 Module Nap Du Lieu]
     end
 
-    subgraph GĐ 3: Xây dựng & Tối ưu Lõi AI (Tuần 8-10)
-        F1[3.1 Xây dựng Lõi RAG v1] --> F2[3.2 Test Lõi RAG trên máy chủ AI]
-        F2 --> F3{3.3 Kết quả Test OK?}
-        F3 -- No --> G1{Xác định Nguyên nhân}
+    subgraph GD3_XayDungVaToiUuLoiAI_Tuan8_10
+        F1[3.1 Xay Dung Loi RAG v1] --> F2[3.2 Test Loi RAG Tren May Chu AI]
+        F2 --> F3{3.3 Ket Qua Test OK?}
+        F3 -- No --> G1{Xac Dinh Nguyen Nhan}
         F3 -- Yes --> H1
-        G1 -- Truy xuất kém/Sai ngữ cảnh --> A1
-        G1 -- "Câu trả lời 'bịa', không bám ngữ cảnh" --> F1
-        G1 -- Lỗi phân quyền/Tốc độ CSDL --> B1
+        G1 -- Truy Xuat Kem/Sai Ngu Canh --> A1
+        G1 -- "Cau Tra Loi 'Bia', Khong Bam Ngu Canh" --> F1
+        G1 -- Loi Phan Quyen/Toc Do CSDL --> B1
     end
 
-    subgraph GĐ 4: Tích hợp & Vận hành (Tuần 11-12)
-        H1[4.1 Xây dựng & Tích hợp UI] --> H2[4.2 Thử nghiệm người dùng cuối - UAT]
-        H2 --> H3{4.3 Người dùng chấp nhận?}
-        H3 -- No --> H4{Xác định Vấn đề}
-        H3 -- Yes --> I1[✅ Vận hành Chính thức]
-        H4 -- Lỗi Giao diện/Trải nghiệm --> H1
-        H4 -- Lỗi Logic/Độ chính xác --> F2
+    subgraph GD4_TichHopVaVanHanh_Tuan11_12
+        H1[4.1 Xay Dung Va Tich Hop UI] --> H2[4.2 Thu Nghiem Nguoi Dung Cuoi - UAT]
+        H2 --> H3{4.3 Nguoi Dung Chap Nhan?}
+        H3 -- No --> H4{Xac Dinh Van De}
+        H3 -- Yes --> I1[✅ Van Hanh Chinh Thuc]
+        H4 -- Loi Giao Dien/Trai Nghiem --> H1
+        H4 -- Loi Logic/Do Chinh Xac --> F2
     end
     
     B2 --> C1
     E1 --> F1
+
 
 ```
 
