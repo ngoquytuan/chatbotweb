@@ -15,7 +15,7 @@ graph TD
         B1[1.3 Thiết Kế CSDL] --> B2[1.4 Xây đựng hệ quản trị CSDL]
     end
 
-    subgraph Giai_Đoạn_2_PhatTrienCongCuVaDuLieu_Tuan4_7
+    subgraph Giai_Đoạn_2_Phát_triển_Tool_và_Dữ_Liệu
         C1[2.1 Xây dựng Tool RawToClean] --> C2[2.2 Phòng ban chuẩn bị dữ liệu]
         C2 --> D1[2.3 Xây dựng Tool đánh giá]
         D1 --> D2{2.4 Dữ liệu đạt yêu cầu?}
@@ -24,11 +24,11 @@ graph TD
     end
 
     subgraph Giai_Đoạn_3_XayDungVaToiUuLoiAI_Tuan8_10
-        F1[3.1 Xay Dung Loi RAG v1] --> F2[3.2 Test Loi RAG Tren May Chu AI]
-        F2 --> F3{3.3 Ket Qua Test OK?}
-        F3 -- No --> G1{Xac Dinh Nguyen Nhan}
+        F1[3.1 Xây dựng core RAG v1] --> F2[3.2 Test core RAG trên máy chủ chatbotAI]
+        F2 --> F3{3.3 Kết quả Test OK?}
+        F3 -- No --> G1{Xác định nguyên nhân}
         F3 -- Yes --> H1
-        G1 -- Truy Xuat Kem/Sai Ngu Canh --> A1
+        G1 -- Truy xuất kém, sai ngữ cảnh --> A1
         G1 -- "Cau Tra Loi 'Bia', Khong Bam Ngu Canh" --> F1
         G1 -- Loi Phan Quyen/Toc Do CSDL --> B1
     end
