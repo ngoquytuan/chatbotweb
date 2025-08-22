@@ -23,7 +23,7 @@ graph TD
         D2 -- Yes --> E1[2.5 Module nạp dữ liệu vào CSDL]
     end
 
-    subgraph Giai_Đoạn_3_XayDungVaToiUuLoiAI_Tuan8_10
+    subgraph Giai_Đoạn_3_Xây_Dựng_Tối_Ưu_CoreRAG
         F1[3.1 Xây dựng core RAG v1] --> F2[3.2 Test core RAG trên máy chủ chatbotAI]
         F2 --> F3{3.3 Kết quả Test OK?}
         F3 -- No --> G1{Xác định nguyên nhân}
