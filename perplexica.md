@@ -716,13 +716,77 @@ Một số dữ liệu nên lưu vào DB để tách biệt:
 * **Frontend ↔ Backend qua REST** (cho dễ xài).
 * **Async qua RabbitMQ/Redis** (cho upload + indexing).
 
+Ok, tôi sẽ giúp bạn vẽ sơ đồ khối bằng **Mermaid** để dễ hình dung các kênh giao tiếp trong kiến trúc này:
+
+* **Frontend ↔ Backend**: dùng **REST API** (đơn giản cho client).
+* **Backend (Node.js) ↔ Python Service**: dùng **gRPC** (tốc độ + typed).
+* **Async xử lý (Upload + Indexing)**: qua **RabbitMQ/Redis**.
+
+Dưới đây là sơ đồ bằng Mermaid:
+
+```mermaid
+flowchart LR
+    subgraph Client["Client / Frontend"]
+        UI["Web UI / Mobile App"]
+    end
+
+    subgraph Backend["Backend (Node.js)"]
+        RESTAPI["REST API Layer"]
+        GRPCClient["gRPC Client Stub"]
+        MQProducer["Async Task Producer"]
+    end
+
+    subgraph Python["Python Service"]
+        GRPCServer["gRPC Server"]
+        Worker["Async Worker (Indexing/ML)"]
+    end
+
+    subgraph MQ["Message Queue"]
+        Rabbit["RabbitMQ / Redis Streams"]
+    end
+
+    %% Connections
+    UI <--> |REST| RESTAPI
+    RESTAPI <--> |gRPC| GRPCClient <--> GRPCServer
+    RESTAPI --> MQProducer --> Rabbit --> Worker
+```
+
+Sơ đồ này cho thấy:
+
+* **Client (UI)** gọi **Backend** qua **REST API**.
+* **Backend** gọi **Python Service** trực tiếp qua **gRPC** khi cần real-time / typed response.
+* Với các job nặng (upload, indexing), **Backend** đẩy vào **RabbitMQ/Redis**, rồi **Worker** trong Python xử lý async.
+
+
+Tuyệt 👌. Đây là **sequence diagram bằng Mermaid** mô tả luồng xử lý khi **user upload → backend → queue → Python xử lý**:
+
+```mermaid
+sequenceDiagram
+    participant User as User (Frontend)
+    participant Backend as Backend (Node.js)
+    participant MQ as RabbitMQ / Redis
+    participant Python as Python Worker
+
+    User->>Backend: Upload file (REST)
+    Backend->>MQ: Push upload/indexing job
+    MQ-->>Python: Deliver job
+    Python->>Python: Process file (indexing, ML, etc.)
+    Python-->>MQ: Send result/status
+    MQ-->>Backend: Notify result ready
+    Backend-->>User: Respond (REST API / Polling / WebSocket)
+```
+
+👉 Ý nghĩa:
+
+* **Frontend** upload qua REST → **Backend**.
+* **Backend** không xử lý trực tiếp mà đẩy job vào **RabbitMQ/Redis**.
+* **Python Worker** lắng nghe, nhận job và xử lý (ví dụ indexing).
+* Sau khi xong, **Python Worker** trả kết quả vào queue (hoặc ghi DB).
+* **Backend** nhận thông báo kết quả, rồi phản hồi cho **User** (có thể qua REST hoặc WebSocket).
+
 ---
 
-Anh muốn em vẽ **sơ đồ khối giao tiếp** cho kiến trúc này (kiểu diagram) để dễ hình dung không?
-
-Anh xác định rất đúng hướng rồi 👍. Để mình phân tích kỹ hơn:
-
----
+Bạn có muốn tôi gộp cả **2 loại giao tiếp (gRPC + Async Queue)** vào **1 sequence diagram tổng hợp** để nhìn thấy luôn trường hợp nào gọi gRPC trực tiếp, trường hợp nào đẩy queue không?
 
 ## 🏗️ Vai trò của module **Indexing**
 
@@ -736,11 +800,7 @@ Anh xác định rất đúng hướng rồi 👍. Để mình phân tích kỹ 
 
 👉 Như vậy, hệ thống **search/query runtime** không phụ thuộc vào indexing. Nếu index bị lỗi, query engine vẫn chạy trên index cũ.
 
----
-
-## ❓ Có cần **fine-tuning** hay **training** không?
-
-Với **RAG cơ bản** (như anh nói – tài liệu nội bộ, văn bản công ty):
+Với **RAG cơ bản** ( tài liệu nội bộ, văn bản công ty):
 
 * **KHÔNG cần fine-tuning**.
 * Chỉ cần **embedding model** (ví dụ: OpenAI text-embedding, hoặc local model như `sentence-transformers`, `bge-small`, `mxbai-embed-large`) để nhúng text thành vector.
@@ -751,8 +811,6 @@ Với **RAG cơ bản** (như anh nói – tài liệu nội bộ, văn bản c�
 * Nếu tài liệu của anh có nhiều **thuật ngữ chuyên ngành riêng** (VD: quy định hàng không, thiết bị đặc thù).
 * Nếu muốn chatbot trả lời **theo phong cách cố định** (ví dụ: trả lời theo giọng văn hành chính).
 * Nếu cần tăng độ **chính xác** khi LLM hay "bịa".
-
-👉 Nhưng giai đoạn đầu, anh **chưa cần**. Chỉ cần RAG với embedding + LLM là đủ.
 
 ---
 
@@ -2160,8 +2218,98 @@ sequenceDiagram
 
 Nếu bạn muốn, mình sẽ viết **2 script mẫu** (k6 + Locust) tương ứng với API stream của bạn (sources/token/done) để team bắn ngay.
 
+Rồi 😎 để tôi vẽ sơ đồ **Chat UI frontend ↔ API Gateway/backend** cho bạn, với ý tưởng giống Perplexica (gọn, trực quan, dễ mở rộng).
+
 ---
 
-Bạn có muốn tôi đóng gói tiếp thành **Deployment Plan** (các bước cài đặt & chạy trong local hoặc server production) hay để ở mức kiến trúc thôi?
+## 🔹 Sơ đồ: Chat UI ↔ Backend API
+
+```mermaid
+flowchart LR
+    subgraph UserDevice[User Device: Browser/Desktop]
+        ChatUI[💬 Chat UI Perplexica style]
+    end
+
+    subgraph BackendAPI[Backend API Layer]
+        APIGateway[🌐 API Gateway / Router]
+        
+        subgraph CoreServices[Core API Services]
+            ChatAPI[💬 Chat API]
+            HealthAPI[❤️ Health Check API]
+            MetricsAPI[📊 Metrics API]
+            FileAPI[📂 File Upload/Download API]
+        end
+    end
+
+    subgraph RAGSystem[RAG & LLM Services]
+        RagPipeline[🔍 Retrieval + Embedding]
+        LLMService[🧠 LLM Service Layer]
+        CacheService[(⚡ Cache & Session Store)]
+    end
+
+    ChatUI <--> APIGateway
+    APIGateway --> ChatAPI
+    APIGateway --> HealthAPI
+    APIGateway --> MetricsAPI
+    APIGateway --> FileAPI
+
+    ChatAPI --> RagPipeline
+    ChatAPI --> LLMService
+    ChatAPI --> CacheService
+
+    MetricsAPI --> CacheService
+```
+
+---
+
+## 🔹 Giải thích
+
+* **Chat UI (Perplexica style)**
+
+  * Giao diện đơn giản, đẹp, giống Perplexica.
+  * Hỗ trợ: nhập câu hỏi, hiển thị kết quả (text + source + citation).
+  * Có thể thêm "side panel" để xem log, metric, hoặc trạng thái model.
+
+* **API Gateway**
+
+  * Là điểm duy nhất frontend gọi → không cần chat UI biết logic bên trong.
+  * Khi thêm API mới (ví dụ `summarize`, `analyze`), chỉ cần mở route mới ở gateway, không ảnh hưởng phần cũ.
+
+* **Chat API**
+
+  * Xử lý request chat (input user, gọi RAG pipeline, rồi gọi LLM).
+  * Giữ state/session (dựa vào Cache Service).
+
+* **Health API**
+
+  * Kiểm tra backend đang chạy OK không.
+  * Thường dùng cho monitoring (Prometheus, Grafana…).
+
+* **Metrics API**
+
+  * Xuất số liệu thống kê: số request, latency, số user đang active.
+  * Tích hợp alert (nếu quá tải).
+
+* **File API (optional)**
+
+  * Cho phép upload tài liệu mới để index vào RAG.
+  * Hoặc download log/chat history.
+
+* **RAG System + LLM Service**
+
+  * Tách biệt hoàn toàn với API layer → nếu đổi LLM model, đổi vectorDB, frontend không cần chỉnh.
+  * Load balancing, fallback LLM (LLM1 lỗi thì gọi LLM2) xử lý tại đây.
+
+---
+
+👉 Tóm lại:
+
+* Frontend (chat UI) chỉ biết gọi **API Gateway**.
+* Thêm API mới thì bổ sung ở backend, frontend chỉ gọi thêm endpoint, không ảnh hưởng hệ thống cũ.
+* Hệ thống **module hóa** → đổi LLM, đổi vectorDB, đổi UI đều không ảnh hưởng đến các phần khác.
+
+---
+
+Bạn có muốn tôi demo luôn một **REST API spec chuẩn OpenAPI (Swagger style)** cho phần này (ví dụ `POST /chat`, `GET /health`, `GET /metrics`…) để bạn có thể code backend khớp ngay với frontend không?
 
 
