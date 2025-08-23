@@ -1289,7 +1289,8 @@ sequenceDiagram
     API->>HC: Mark RAG1 unhealthy
     API->>RAG2: Retry/migrate stream (resume if possible*)
     RAG2-->>API: Stream tiếp tục
-    API-->>UI: Token tiếp; UI có thể thấy 1-2s “reconnecting”
+    API-->>UI: Token tiếp
+    #UI có thể thấy 1-2s “reconnecting”
 ```
 
 \* **Resume**: nếu muốn liền mạch, API có thể buffer prompt & contexts, rồi chuyển cuộc gọi sang RAG2 với cùng “conversation id”; nếu LLM không hỗ trợ resume, UI chỉ thấy gián đoạn ngắn.
@@ -1310,7 +1311,7 @@ sequenceDiagram
     Router->>DB2: Failover đọc (read-only)
     DB2-->>Router: Trả kết quả
     Router-->>RAG: Contexts trả về bình thường
-    Note over Router,DB1,DB2: Quá trình bầu chọn/đổi vai primary diễn ra nền (tuỳ công nghệ)
+    #Note over Router,DB1,DB2: Quá trình bầu chọn/đổi vai primary diễn ra nền (tuỳ công nghệ)
 ```
 
 > **Indexing** nên tạm dừng ghi khi failover đang diễn ra để tránh split-brain; đọc (query) vẫn phục vụ từ replica.
