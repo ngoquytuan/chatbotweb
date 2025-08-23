@@ -1642,11 +1642,11 @@ flowchart TD
     end
 
     subgraph RAGEngine[RAG Engine]
-        D[Retriever Manager<br>(truy vấn embedding DB)]
-        E[Embedding Service<br>(biến câu hỏi thành vector)]
-        R[Ranker/Filter<br>(lọc, chọn k-passages tốt nhất)]
-        LLM1[LLM Service 1<br>(ví dụ GPT, LLaMA...)]
-        LLM2[LLM Service 2<br>(fallback hoặc load-balance)]
+        D[Retriever Manager truy vấn embedding DB]
+        E[Embedding Service biến câu hỏi thành vector]
+        R[Ranker/Filter lọc, chọn k-passages tốt nhất]
+        LLM1[LLM Service 1 ví dụ GPT, LLaMA...]
+        LLM2[LLM Service 2 fallback hoặc load-balance]
     end
 
     subgraph KB[Vector Database]
