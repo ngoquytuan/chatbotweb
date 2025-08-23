@@ -1290,7 +1290,7 @@ sequenceDiagram
     API->>RAG2: Retry/migrate stream (resume if possible*)
     RAG2-->>API: Stream tiếp tục
     API-->>UI: Token tiếp
-    #UI có thể thấy 1-2s “reconnecting”
+    Note over UI:UI có thể thấy 1-2s “reconnecting”
 ```
 
 \* **Resume**: nếu muốn liền mạch, API có thể buffer prompt & contexts, rồi chuyển cuộc gọi sang RAG2 với cùng “conversation id”; nếu LLM không hỗ trợ resume, UI chỉ thấy gián đoạn ngắn.
